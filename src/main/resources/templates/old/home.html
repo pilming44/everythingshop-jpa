@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+	<meta charset="utf-8">
+	<title>상품 목록</title>
+	<!-- 부트스트랩 CSS 파일 불러오기 -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+	<style>
+		.field-error {
+			border-color: #dc3545;
+			color: #dc3545;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<!-- 상품 목록 제목 -->
+		<div class="row mt-3">
+			<div class="col text-center"><h2 class="font-weight-bold" th:text="#{page.title.home}">상품 목록</h2></div>
+		</div>
+		<div class="row mt-3">
+			<div class="col-md-8"></div>
+			<div class="col-md-2 d-grid">
+				<button class="register-btn btn btn-primary btn-block" th:onclick="|location.href='@{/users/join}'|" sec:authorize="isAnonymous()" th:text="#{button.join}">회원가입</button>
+				<button class="btn btn-primary btn-block"
+						onclick="location.href='/'"
+						th:onclick="|location.href='@{/myPage}'|" sec:authorize="isAuthenticated()" th:text="#{button.myPage}">마이페이지</button>
+			</div>
+			  <div class="col-md-2">
+				  <button class="login-btn btn btn-primary btn-block"
+						  onclick="location.href='signIn.html'"
+						  th:onclick="|location.href='@{/users/signIn}'|" sec:authorize="isAnonymous()" th:text="#{button.singIn}">로그인</button>
+				  <button class="register-btn btn btn-secondary btn-block"
+						  onclick="location.href='/logout'"
+						  th:onclick="|location.href='@{/logout}'|"
+						  sec:authorize="isAuthenticated()" th:text="#{button.logOut}">로그아웃</button>
+			  </div>
+		</div>
+		<div sec:authorize="isAuthenticated()">
+			<strong sec:authentication="name"></strong>님 <span class="text-danger">(<span sec:authentication="principal.holdingPoint"></span>P)</span>
+			<span sec:authentication="principal.gradeNm"></span>
+			<img th:if="${#authentication.principal.gradeNm == '블랙홀'}" src="/blackHole.png" height="48" width="48"/>
+			<img th:if="${#authentication.principal.gradeNm == '은하'}" src="/galaxy.png" height="48" width="48"/>
+			<img th:if="${#authentication.principal.gradeNm == '태양'}" src="/sun.png" height="48" width="48"/>
+			<img th:if="${#authentication.principal.gradeNm == '지구'}" src="/earth.png" height="48" width="48"/>
+			<img th:if="${#authentication.principal.gradeNm == '달'}" src="/moon.png" height="48" width="48"/>
+		</div>
+		<form action="/home" th:action th:object="${productSearchDTO}" method="get">
+			<!-- 검색창 -->
+			<div class="row mt-3">
+				<div class="col-md-5">
+					<!-- 상품명 검색 input -->
+					<input type="text" class="form-control" th:field="*{productNm}" placeholder="상품명을 입력하세요">
+				</div>
+			</div>
+			<div class="row mt-3">
+				<div class="col-md-5  mb-3">
+					<div class="row">
+						<div class="col">
+							<!-- 최소 가격 input -->
+							<input type="text" class="form-control" th:field="*{fromPrice}" th:errorclass="field-error" placeholder="최소 가격" maxlength="9">
+						</div>
+						<div class="col-auto align-self-center">
+							<!-- "~" 기호 -->
+							<span class="font-weight-bold">~</span>
+						</div>
+						<div class="col">
+							<!-- 최대 가격 input -->
+							<input type="text" class="form-control" th:field="*{toPrice}" th:errorclass="field-error" placeholder="최대 가격" maxlength="9">
+						</div>
+					</div>
+				</div>
+				<div class="col-md-2">
+					<div class="d-flex justify-content-between">
+						<!-- 검색 버튼 -->
+						<button class="btn btn-secondary btn-block" type="submit" th:text="#{button.search}">검색</button>
+					</div>
+				</div>
+				<div class="col-md-3"></div>
+				<div class="col-md-2">
+					<div class="text-right">
+						<button class="btn btn-primary btn-block"
+								th:onclick="|event.preventDefault(); location.href='@{/product/register}'|"
+								sec:authorize="hasRole('ROLE_02')" th:text="#{button.product.add}">상품등록</button>
+						<button class="btn btn-primary btn-block"
+								sec:authorize="hasRole('ROLE_03')" th:text="#{button.seller}">판매자신청</button>
+					</div>
+				</div>
+			</div>
+		</form>
+		<!-- 검색창 -->
+		<div th:object="${productSearchDTO}">
+			<div class="row mt-3" th:if="${#fields.hasErrors('fromPrice') or #fields.hasErrors('toPrice')}">
+				<div class="col-md-5 mb-3">
+					<div class="row">
+						<div class="col">
+							<!-- 최소 가격 에러 -->
+							<div class="field-error" th:errors="*{fromPrice}">
+								최소가격 오류
+							</div>
+						</div>
+						<div class="col-auto align-self-center">
+						</div>
+						<div class="col">
+							<!-- 최대 가격 에러 -->
+							<div class="field-error" th:errors="*{toPrice}">
+								최대가격 오류
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- 상품 목록 테이블 -->
+		<div class="row mt-3">
+			<div class="mt-3 col-md-12 table-responsive">
+				<table class="table table-bordered">
+					<thead>
+						<tr>
+							<th class="text-center" style="width: 5%" th:text="#{label.product.productNum}">No.</th>
+							<th class="text-center" style="width: 25%" th:text="#{label.product.productName}">상품명</th>
+							<th class="text-center" style="width: 10%" th:text="#{label.product.price}">가격(원)</th>
+							<th class="text-center" style="width: 10%" th:text="#{label.product.remainQuantity}">남은 수량(개)</th>
+							<th class="text-center" style="width: 10%" th:text="#{label.product.salesQuantity}">판매 수량(개)</th>
+							<th class="text-center" style="width: 10%" th:text="#{label.product.productStts}">판매 상태</th>
+							<th class="text-center" style="width: 10%" th:text="#{label.product.views}">조회수</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="product : ${products}">
+							<td class="text-center" th:text="${product.rowNum}">번호</td>
+							<td><a href="/static" th:href="@{|/product/${product.productNum}|}" th:text="${product.productNm}">상품명</a></td>
+							<td class="text-center" th:text="${product.productPrice}">상품가격</td>
+							<td class="text-center" th:text="${product.remainQuantity}">잔여수량</td>
+							<td class="text-center" th:text="${product.salesQuantity}">판매수량</td>
+							<td class="text-center" th:text="${product.productStatusNm}">판매상태</td>
+							<td class="text-center" th:text="${product.views}">조회수</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<!-- 페이징 -->
+		<nav class="mt-3" aria-label="page navigation">
+			<ul class="pagination justify-content-center">
+				<li class="page-item" th:classappend="${paginationInfo.currentPageNo == 1} ? disabled">
+					<a class="page-link" th:href="@{/home(currentPageNo=${paginationInfo.currentPageNo - 1}
+																		, productNm=${productSearchDTO.productNm}
+																		, fromPrice=${productSearchDTO.fromPrice}
+																		, toPrice=${productSearchDTO.toPrice})}"
+					   th:text="#{button.previous}">
+						이전
+					</a>
+				</li>
+				<li class="page-item" th:classappend="${paginationInfo.currentPageNo == pageNo} ? active"  th:each="pageNo : ${#numbers.sequence(paginationInfo.firstPageNoOnPageList, paginationInfo.lastPageNoOnPageList)}">
+					<a class="page-link" th:href="@{/home(currentPageNo=${pageNo}
+														, productNm=${productSearchDTO.productNm}
+														, fromPrice=${productSearchDTO.fromPrice}
+														, toPrice=${productSearchDTO.toPrice})}"
+					   th:text="${pageNo}"></a>
+				</li>
+				<li class="page-item" th:classappend="${paginationInfo.currentPageNo == paginationInfo.totalPageCount} ? disabled">
+					<a class="page-link" th:href="@{/home(currentPageNo=${paginationInfo.currentPageNo + 1}
+																		, productNm=${productSearchDTO.productNm}
+																		, fromPrice=${productSearchDTO.fromPrice}
+																		, toPrice=${productSearchDTO.toPrice})}"
+					   th:text="#{button.next}">
+						다음
+					</a>
+				</li>
+			</ul>
+		</nav>
+	</div>
+</body>
+</html>
+<script th:inline="javascript">
+	var successMessage = /*[[${productRegi_success}]]*/ "";
+	var failMessage = /*[[${productRegi_fail}]]*/ "";
+
+	if (successMessage || failMessage) {
+		var message = successMessage ? successMessage : failMessage;
+		alert(message);
+	}
+</script>

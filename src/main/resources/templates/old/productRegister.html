@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{page.title.product.register}">상품등록</title>
+    <!-- 부트스트랩 CSS 파일 불러오기 -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container justify-content-center">
+    <!-- 페이지 타이틀 -->
+    <div class="row mt-3">
+        <div class="col text-center"><h2 class="font-weight-bold" th:text="#{page.title.product.register}">상품등록</h2></div>
+    </div>
+    <!-- 입력정보 -->
+    <form id="productRegisterForm" th:action="@{/product/register}" th:object="${productRegisterDTO}" method="post">
+        <div class="row mt-3">
+            <div class="col-md-5 mx-auto">
+                <label for="productNm" th:text="#{label.product.productName}">*상품명 : </label>
+                <input type="text" th:field="*{productNm}" id="productNm" class="form-control" placeholder="상품명" >
+            </div>
+        </div>
+        <div th:if="${#fields.hasErrors('productNm')}">
+            <div class="row mt-0" id="productNmError">
+                <div class="col-md-5 mx-auto">
+                    <span th:errors="*{productNm}" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-5 mx-auto">
+                <label for="productPrice" th:text="#{label.product.price}">*가격 : </label>
+                <input type="number" th:field="*{productPrice}" th:errorclass="border-danger" id="productPrice" class="form-control" placeholder="가격" >
+            </div>
+        </div>
+        <div th:if="${#fields.hasErrors('productPrice')}">
+            <div class="row mt-0" id="productPriceError">
+                <div class="col-md-5 mx-auto">
+                    <span th:errors="*{productPrice}" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-5 mx-auto">
+                <label for="registerQuantity" th:text="#{label.product.quantity}">*수량 : </label>
+                <input type="number"  th:errorclass="border-danger" th:field="*{registerQuantity}" id="registerQuantity" class="form-control" placeholder="수량" >
+            </div>
+        </div>
+        <div th:if="${#fields.hasErrors('registerQuantity')}">
+            <div class="row mt-0" id="registerQuantityError">
+                <div class="col-md-5 mx-auto">
+                    <span th:errors="*{registerQuantity}" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-5 mx-auto">
+                <label for="productStatusCd" th:text="#{label.product.productStts}">*상태 : </label>
+                <select class="custom-select" id="productStatusCd" th:field="*{productStatusCd}">
+                    <option value="01">판매준비</option>
+                    <option value="02">판매중</option>
+                </select>
+            </div>
+        </div>
+        <!-- 버튼 -->
+        <div class="row mt-3">
+            <div class="col-md-5 mx-auto">
+                <div class="row">
+                    <div class="col">
+                        <button id="" class="btn btn-primary btn-lg btn-block" type="submit" th:text="#{button.register}">등록</button>
+                    </div>
+                    <div class="col">
+                        <button class="btn btn-secondary btn-lg btn-block"
+                                onclick="location.href='home.html'"
+                                th:onclick="|location.href='@{/home}'|"
+                                type="button" th:text="#{button.cancel}">취소</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>
